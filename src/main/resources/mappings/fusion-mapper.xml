@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanyuan.mapper.FusionMapper">
+	<select id="findFusionPage" resultType="com.lanyuan.entity.Fusion">
+		select
+		t1.id as id1,
+		t1.useId as useId1,
+		t1.rawId as rawId1,
+		t1.fusionNo as fusionNo1,
+		t1.person as person1,
+		t1.createDate as createDate1,
+		t1.result as result1
+		from tap_fusion t1
+		where 1 = 1
+		<if test="fusionNo1 != null and fusionNo1 != ''">
+			and t1.fusionNo <![CDATA[=]]> '${fusionNo1}'
+		</if>
+		<if test="createDate1 != null and createDate1 != ''">
+			and date_format(t1.createDate,'%Y-%m-%d') <![CDATA[<=]]> '${createDate1}'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+
+	<insert id="addFusionEntity">
+		insert into tap_fusion(rawId,useId,fusionNo,person,createDate,result) values('${rawId}',#{useId},'${fusionNo}','${person}',#{createDate},'${result}')
+	</insert>
+
+	<insert id="addFusionMeterialEntity">
+		insert into tap_fusion_material(rawId,rawStockId,count) values('${rawId}',#{id},'${count}')
+	</insert>
+
+	<select id="findMeterial" resultType="com.lanyuan.entity.Fusion">
+		select
+		y.name,
+		t.count,
+		y.unit
+		from
+		tap_fusion_material t
+		left join tap_raw_stock y on t.rawstockid = y.id
+		where
+		t.rawid = '${rawId}' and t.count > 0
+	</select>
+
+	<select id="findFusion" resultType="com.lanyuan.entity.Fusion">
+		select
+		t1.id as id1,
+		t1.useId as useId1,
+		t1.rawId as rawId1,
+		t1.fusionNo as fusionNo1,
+		t1.person as person1,
+		t1.createDate as createDate1,
+		t1.result as result1
+		from tap_fusion t1
+		where 1 = 1
+		order by t1.fusionNo
+	</select>
+</mapper>

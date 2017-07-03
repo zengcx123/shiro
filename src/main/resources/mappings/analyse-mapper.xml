@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanyuan.mapper.AnalyseMapper">
+    <!--mybatis ehcache缓存配置 -->
+    <!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 <cache type="org.mybatis.caches.ehcache.LoggingEhcache"
+        /> -->
+    <!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+    <!-- 以下与实体类的中字段一致 -->
+    <select id="findAnalyseGroupBy" resultType="java.util.Map">
+        select
+            t3.orderNumber orderNumber,
+            t4.productPicNo productPicNo
+        from
+            tap_order_detail_status t1
+        left join tap_order_detail t2 on t1.orderdetailid = t2.id
+        left join tap_order t3 on t2.orderid = t3.id
+        left join tap_product t4 on t2.productid = t4.id
+        where 1 = 1
+        <if test="orderNumber != null and orderNumber != ''">
+            and t3.orderNumber = #{orderNumber}
+        </if>
+        <if test="productPicNo != null and productPicNo != ''">
+            and t4.productPicNo = '${productPicNo}'
+        </if>
+        and t1.createDate <![CDATA[>=]]> '${createDate1}'
+        and t1.createDate <![CDATA[<=]]> '${createDate2}'
+        <if test="cus != null and cus != ''">
+            and t3.ordernumberin like '%${cus}%'
+        </if>
+        group by t3.ordernumber,t4.productpicno
+        <if test="type == 0">
+            <if test="column != null">
+                order by ${column} ${sort}
+            </if>
+        </if>
+        <if test="type == 1">
+            order by t3.ordernumber
+        </if>
+        <if test="type == 2">
+            order by t4.productpicno
+        </if>
+    </select>
+
+    <select id="findAnalyse" resultType="java.util.Map">
+        select
+            t3.orderNumber,
+            str_to_date(t2.deliveryDate,'%Y-%m-%d') deliveryDate,
+            str_to_date(t2.relDeliveryDate,'%Y-%m-%d') relDeliveryDate,
+            t2.total,
+            t2.isBack,
+            t1.id,
+            t1.orderDetailId,
+            t1.createDate,
+            t1.inspection,
+            t1.accBack,
+            t1.inStock,
+            t1.outStock,
+            t1.back,
+            t4.productName,
+            t4.productPicNo,
+            t4.productMaterial,
+            t4.productWeight,
+            t4.productUnit,
+            t4.id as productId,
+            t2.isFinish
+        from
+            tap_order_detail_status t1
+        left join tap_order_detail t2 on t1.orderdetailid = t2.id
+        left join tap_order t3 on t2.orderid = t3.id
+        left join tap_product t4 on t2.productid = t4.id
+        where 1 = 1
+        and t3.ordernumber = '${orderNumber}'
+        and t4.productPicNo = '${productPicNo}'
+        and t1.createDate <![CDATA[>=]]> '${createDate1}'
+        and t1.createDate <![CDATA[<=]]> '${createDate2}'
+    </select>
+
+
+</mapper>

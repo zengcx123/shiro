@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanyuan.mapper.UseMapper">
+	<select id="findUsePage" resultType="com.lanyuan.entity.Use">
+		select
+		t1.id as id1,
+		t1.rawId as rawId1,
+		t1.useNo as useNo1,
+		t1.person as person1,
+		t1.createDate as createDate1
+		from tap_use t1
+		where 1 = 1
+		<if test="createDate1 != null and createDate1 != ''">
+			and date_format(t1.createDate,'%Y-%m-%d') <![CDATA[<=]]> '${createDate1}'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+
+	<insert id="addUseEntity">
+		insert into tap_use(rawId,useNo,person,createDate) values('${rawId}','${useNo}','${person}',#{createDate})
+	</insert>
+
+	<insert id="addUseMeterialEntity">
+		insert into tap_material(rawId,rawStockId,count,overplus) values('${rawId}',#{id},'${count}','${count}')
+	</insert>
+
+	<select id="findMeterial" resultType="com.lanyuan.entity.Use">
+		select
+		y.name,
+		t.count,
+		t.overplus,
+		y.unit
+		from
+		tap_material t
+		left join tap_raw_stock y on t.rawstockid = y.id
+		where
+		t.rawid = '${rawId}' and t.count > 0
+	</select>
+
+	<select id="findUse" resultType="com.lanyuan.entity.Use">
+		select
+		id,
+		rawId,
+		useNo,
+		person,
+		createDate
+		from tap_use
+		where 1 = 1
+	</select>
+
+	<select id="findUseMeterial" resultType="com.lanyuan.entity.Use">
+		select k.id id3,y.id id2,k.name name3,k.unit unit3,y.overplus overplus2 from tap_use t
+			left join tap_material y on t.rawId = y.rawId
+			left join tap_raw_stock k on y.rawStockId = k.id
+		where t.id = #{useId} and y.overplus > 0
+	</select>
+
+	<update id="updateOverplus">
+		update tap_material set overplus = overplus - '${count}' where id = #{id}
+	</update>
+</mapper>

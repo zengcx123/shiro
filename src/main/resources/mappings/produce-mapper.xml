@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanyuan.mapper.ProduceMapper">
+	<!--mybatis ehcache缓存配置 -->
+	<!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 <cache type="org.mybatis.caches.ehcache.LoggingEhcache"
+		/> -->
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+	<!-- 以下与实体类的中字段一致 -->
+	<sql id="selectId">
+		t.id,
+		t.customerId,
+		k.company,
+		t.planNo,
+		t.productId,
+		y.productName,
+		y.productPicNo,
+		t.count,
+		t.needDate,
+		t.model,
+		t.box,
+		t.bell,
+		t.openBox,
+		t.polish,
+		t.hot,
+		t.sand,
+		t.inspection,
+		t.back,
+		t.inStock,
+		t.reject,
+		t.owe,
+		t.isFinish
+	</sql>
+
+	<select id="findProducePage" resultType="com.lanyuan.entity.Produce">
+		select
+		<include refid="selectId" />
+		from tap_plan t
+		left join tap_product y on t.productId = y.id
+		left join tap_customer k on t.customerId = k.id
+		where 1 = 1
+		<if test="productName != null and productName != ''">
+			and productName = '${productName}'
+		</if>
+		<if test="productPicNo != null and productPicNo != ''">
+			and productPicNo = '${productPicNo}'
+		</if>
+		<if test="needDate != null and needDate != ''">
+			and date_format(needDate,'%Y-%m-%d') <![CDATA[<=]]> '${needDate}'
+		</if>
+		<if test="isFinish != null and isFinish != ''">
+			and isFinish = '${isFinish}'
+		</if>
+		<if test="column != null">
+			order by ${column} ${sort}
+		</if>
+	</select>
+
+	<insert id="addProduceEntity">
+		insert into tap_plan(planNo,customerId,productId,count,needDate,isFinish,owe) values ('${planNo}',#{customerId},#{productId},'${count}',#{needDate},'0',#{owe})
+	</insert>
+
+	<insert id="addDetailEntity">
+		insert into tap_plan_detail(planId,startDate,endDate,count) values (#{planId},#{startDate},#{endDate},'${count}')
+	</insert>
+
+	<select id="findDetail" resultType="com.lanyuan.entity.ProduceDetail">
+		select
+			id,
+			planId,
+			startDate,
+			endDate,
+			count
+		from tap_plan_detail where planId = #{planId}
+	</select>
+
+	<delete id="deleteProduceDetailEntity">
+		delete from tap_plan_detail where planId = #{planId}
+	</delete>
+
+	<select id="findProduceById" resultType="com.lanyuan.entity.Produce">
+		select
+		<include refid="selectId" />
+		from tap_plan t
+		left join tap_product y on t.productId = y.id
+		left join tap_customer k on t.customerId = k.id
+		where 1 = 1 and t.id = #{planId}
+	</select>
+
+	<update id="updateProduce">
+		update tap_plan set
+			model = #{model},box = #{box},bell = #{bell},openBox = #{openBox},polish = #{polish},hot = #{hot},sand = #{sand},
+		    inspection = #{inspection},back = #{back},inStock = #{inStock},reject = #{reject},owe = #{owe},isFinish = '${isFinish}'
+		where id = #{planId}
+	</update>
+
+	<update id="updateNeedDate">
+		update tap_plan set needDate = #{needDate} where id = #{id}
+	</update>
+
+	<select id="findStatus" resultType="com.lanyuan.entity.PlanFormMap">
+		select
+				id,
+				planNo,
+				planId,
+				createDate,
+				model,
+				box,
+				bell,
+				openBox,
+				polish,
+				hot,
+				sand,
+				modelReject,
+				boxReject,
+				bellReject,
+				openBoxReject,
+				polishReject,
+				hotReject,
+				sandReject,
+				inspection,
+				back,
+				inStock,
+				fusionId
+		from tap_plan_detail_status where planId = #{planId}
+	</select>
+
+	<delete id="deleteProduceById">
+		delete from tap_plan where id = #{planId}
+	</delete>
+
+	<select id="findAllStatus" resultType="com.lanyuan.entity.PlanFormMap">
+		select
+		id,
+		planNo,
+		planId,
+		createDate,
+		model,
+		box,
+		bell,
+		openBox,
+		polish,
+		hot,
+		sand,
+		modelReject,
+		boxReject,
+		bellReject,
+		openBoxReject,
+		polishReject,
+		hotReject,
+		sandReject,
+		inspection,
+		back,
+		inStock,
+		fusionId
+		from tap_plan_detail_status where 1 = 1
+		<if test="createDate != null and createDate != ''">
+			and date_format(createDate,'%Y-%m-%d') <![CDATA[<=]]> '${createDate}'
+		</if>
+		<if test="column != null">
+			order by ${column} ${sort}
+		</if>
+	</select>
+
+	<select id="findPlanFormMap" resultType="com.lanyuan.entity.PlanFormMap">
+		select
+		id,
+		planNo,
+		planId,
+		createDate,
+		model,
+		box,
+		bell,
+		openBox,
+		polish,
+		hot,
+		sand,
+		modelReject,
+		boxReject,
+		bellReject,
+		openBoxReject,
+		polishReject,
+		hotReject,
+		sandReject,
+		inspection,
+		back,
+		inStock,
+		fusionId
+		from tap_plan_detail_status where id = #{id}
+	</select>
+</mapper>

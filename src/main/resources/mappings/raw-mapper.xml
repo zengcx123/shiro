@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanyuan.mapper.RawMapper">
+	<!--mybatis ehcache缓存配置 -->
+	<!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 <cache type="org.mybatis.caches.ehcache.LoggingEhcache"
+		/> -->
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+	<!-- 以下与实体类的中字段一致 -->
+	<sql id="selectId">
+		id,
+		name,
+		count,
+		unit,
+		identification
+	</sql>
+
+	<select id="findRawbyId" resultType="com.lanyuan.entity.RawFormMap">
+		select
+		<include refid="selectId" />
+		from tap_raw_stock
+		where 1 = 1 and id = #{id}
+	</select>
+
+	<select id="findRawPage" resultType="com.lanyuan.entity.RawFormMap">
+		select
+		<include refid="selectId" />
+		from tap_raw_stock
+		where 1 = 1 and count > 0
+		<if test="name != null and name != ''">
+			and name like '%${name}%'
+		</if>
+		<if test="identification != null and identification != ''">
+			and identification = '${identification}'
+		</if>
+		<if test="column != null">
+			order by ${column} ${sort}
+		</if>
+	</select>
+
+	<insert id="addRawEntity">
+		insert into tap_raw_stock (name,count,unit,identification) values ('${name}','${count}','${unit}','${identification}')
+	</insert>
+
+	<update id="updateRawEntity">
+		update tap_raw_stock set name = '${name}',count = '${count}',unit = '${unit}',identification = '${identification}' where id = #{id}
+	</update>
+
+	<delete id="deleteRawEntity">
+		delete from tap_raw_stock where id = #{id}
+	</delete>
+
+	<select id="findRawByCondition" resultType="com.lanyuan.entity.RawFormMap">
+		select
+		<include refid="selectId" />
+		from tap_raw_stock
+		where 1 = 1 and name = '${name}' and identification = '${identification}'
+	</select>
+
+	<update id="updateRawEntityByCondition">
+		update tap_raw_stock set count = '${count}' where name = '${name}' and identification = '${identification}'
+	</update>
+
+	<select id="findRaw" resultType="com.lanyuan.entity.RawFormMap">
+		select
+		<include refid="selectId" />
+		from tap_raw_stock
+		where 1 = 1 and count > 0 order by name
+	</select>
+
+	<update id="updateRawCount">
+		update tap_raw_stock set count = count - '${count}' where id = #{id}
+	</update>
+</mapper>

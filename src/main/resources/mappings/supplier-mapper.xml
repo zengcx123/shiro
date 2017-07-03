@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanyuan.mapper.SupplierMapper">
+	<!--mybatis ehcache缓存配置 -->
+	<!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 <cache type="org.mybatis.caches.ehcache.LoggingEhcache"
+		/> -->
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+	<!-- 以下与实体类的中字段一致 -->
+	<sql id="selectId">
+		id,
+		company,
+		number,
+		product,
+		name,
+		case when sex = '0' then '男' else '女' end as sex,
+		telephone,
+		email,
+		invoice
+	</sql>
+
+	<select id="findSupplierPage" resultType="com.lanyuan.entity.SupplierFormMap">
+		select
+		<include refid="selectId" />
+		from tap_supplier
+		where 1 = 1
+		<if test="company != null and company != ''">
+		and company like '%${company}%'
+		</if>
+		<if test="name != null and name != ''">
+			and name like '%${name}%'
+		</if>
+		<if test="telephone != null and telephone != ''">
+			and telephone = '${telephone}'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+
+	<select id="findSupplier" parameterType="int" resultType="com.lanyuan.entity.SupplierFormMap">
+		select
+		id,
+		company,
+		number,
+		product,
+		name,
+		sex,
+		telephone,
+		email,
+		invoice
+		from tap_supplier
+		where 1 = 1
+		<if test="id != 0">
+			and id = #{id}
+		</if>
+		order by company
+	</select>
+</mapper>

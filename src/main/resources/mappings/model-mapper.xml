@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanyuan.mapper.ModelMapper">
+	<!--mybatis ehcache缓存配置 -->
+	<!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 <cache type="org.mybatis.caches.ehcache.LoggingEhcache"
+		/> -->
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+	<!-- 以下与实体类的中字段一致 -->
+	<sql id="selectId">
+		t1.id,
+		t1.productId,
+		t1.stock,
+		t2.productName,
+		t2.productPicNo,
+		t2.productMaterial,
+		t2.productWeight,
+		t2.productUnit,
+		t2.productPrice
+	</sql>
+
+	<select id="findModelPage" resultType="com.lanyuan.entity.ModelFormMap">
+		select
+		<include refid="selectId" />
+		from tap_mould_stock t1 left join tap_product t2 on t1.productId = t2.id
+		where 1 = 1 and t1.stock > 0
+		<if test="productName != null and productName != ''">
+			and t2.productName = '${productName}'
+		</if>
+		<if test="productPicNo != null and productPicNo != ''">
+			and t2.productPicNo = '${productPicNo}'
+		</if>
+		<if test="column != null">
+			order by ${column} ${sort}
+		</if>
+	</select>
+
+	<insert id="addModelEntity">
+		insert into tap_mould_stock (productId,stock) values (#{productId},'${stock}')
+	</insert>
+
+	<update id="updateModelEntity">
+		update tap_mould_stock set stock = '${stock}' where id = #{id}
+	</update>
+
+	<delete id="deleteModelEntity">
+		delete from tap_mould_stock where id = #{id}
+	</delete>
+
+	<select id="findModelbyId" resultType="com.lanyuan.entity.ModelFormMap">
+		select
+		<include refid="selectId" />
+		from tap_mould_stock t1 left join tap_product t2 on t1.productId = t2.id
+		where 1 = 1 and t1.id = #{id}
+	</select>
+
+	<select id="findModelbyProductId" resultType="com.lanyuan.entity.ModelFormMap">
+		select
+		<include refid="selectId" />
+		from tap_mould_stock t1 left join tap_product t2 on t1.productId = t2.id
+		where 1 = 1 and t1.productId = #{productId}
+	</select>
+</mapper>

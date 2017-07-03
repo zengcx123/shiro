@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanyuan.mapper.BuyMapper">
+	<!--mybatis ehcache缓存配置 -->
+	<!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 <cache type="org.mybatis.caches.ehcache.LoggingEhcache"
+		/> -->
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+	<!-- 以下与实体类的中字段一致 -->
+	<sql id="selectId">
+		t.id,
+		t.buyNo,
+		t.supplierId,
+		y.company,
+		t.material,
+		t.count,
+		t.unit,
+		t.createDate,
+		t.needDate,
+		t.deliveryDate,
+		t.inspectionDate,
+		t.inStockDate,
+		t.identification,
+		t.remark,
+		t.person,
+		t.isFinish
+	</sql>
+
+	<select id="findBuyPage" resultType="com.lanyuan.entity.Buy">
+		select
+		<include refid="selectId" />
+		from tap_buy t left join tap_supplier y on t.supplierId = y.id
+		where 1 = 1
+		<if test="supplierId != null and supplierId != ''">
+		and supplierId = #{supplierId}
+		</if>
+		<if test="material != null and material != ''">
+			and material like '%${material}%'
+		</if>
+		<if test="createDate != null and createDate != ''">
+			and date_format(t.createDate,'%Y-%m-%d') <![CDATA[<=]]> '${createDate}'
+		</if>
+		<if test="isFinish != null and isFinish != ''">
+			and isFinish = '%${isFinish}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+
+	<insert id="addBuyEntity">
+		insert into tap_buy(
+			buyNo,
+			supplierId,
+			material,
+			count,
+			unit,
+			createDate,
+			needDate,
+			deliveryDate,
+			inspectionDate,
+			inStockDate,
+			identification,
+			remark,
+			person
+		) values(
+			'${buyNo}',
+			#{supplierId},
+			'${material}',
+			'${count}',
+			'${unit}',
+			#{createDate},
+			#{needDate},
+			#{deliveryDate},
+			#{inspectionDate},
+			#{inStockDate},
+			'${identification}',
+			'${remark}',
+			'${person}'
+		)
+	</insert>
+
+	<select id="findBuyById" resultType="com.lanyuan.entity.Buy">
+		select
+		<include refid="selectId" />
+		from tap_buy t left join tap_supplier y on t.supplierId = y.id
+		where 1 = 1 and t.id = #{id}
+	</select>
+
+	<update id="editBuyEntity">
+		update tap_buy set
+			needDate = #{needDate},
+			deliveryDate = #{deliveryDate},
+			inspectionDate = #{inspectionDate},
+			inStockDate = #{inStockDate},
+			remark = #{remark},
+			isFinish = '${isFinish}'
+		where id = #{id}
+	</update>
+
+	<delete id="deleteById">
+		delete from tap_buy where id = #{id}
+	</delete>
+</mapper>

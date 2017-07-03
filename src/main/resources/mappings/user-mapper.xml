@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanyuan.mapper.UserMapper">
+	<!--mybatis ehcache缓存配置 -->
+	<!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 <cache type="org.mybatis.caches.ehcache.LoggingEhcache"
+		/> -->
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+	<!-- 以下与实体类的中字段一致 -->
+	<sql id="selectId">
+		id,
+		userName,
+		accountName,
+		(select group_concat(name) from ly_role
+		where ly_role.id
+		in (select roleId from ly_user_role where
+		userId=ly_user.id) ) roleName,
+		password,
+		description,
+		case when locked = 0 then '禁用' else '正常' end as locked,
+		credentialsSalt,
+		createTime,
+		headPic
+	</sql>
+
+	<select id="findUserPage" resultType="com.lanyuan.entity.UserFormMap">
+		select
+		<include refid="selectId" />
+		from ly_user
+		where 1 = 1
+		<if test="accountName != null and accountName != ''">
+		and accountname like '%${accountName}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+
+	<update id="resetPassword">
+		update ly_user t set t.password = #{password} where t.id = #{id}
+	</update>
+
+	<select id="findUserById" resultType="com.lanyuan.entity.UserFormMap">
+		select
+		<include refid="selectId" />
+		from ly_user
+		where 1 = 1
+		and id = #{id}
+	</select>
+
+	<update id="updateHead">
+		update ly_user t set t.headPic = #{path} where t.id = #{id}
+	</update>
+</mapper>
